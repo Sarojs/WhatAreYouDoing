@@ -1,0 +1,27 @@
+//
+//  Person.m
+//  DatabaseExample
+//
+//  Created by MAC22 on 04/07/11.
+//  Copyright (c) 2011 Diaspark India. All rights reserved.
+//
+
+#import "Person.h"
+
+
+@implementation Person
+@synthesize Name;
+@synthesize Phone;
+@synthesize Email;
+@synthesize Desc;
+
+-(void)dealloc{
+    [Name release];
+    [Phone release];
+    [Email release];
+    [Desc release];
+    [super dealloc];
+    
+}
+
+@end

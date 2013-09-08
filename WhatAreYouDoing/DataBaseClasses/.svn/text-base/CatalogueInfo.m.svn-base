@@ -1,0 +1,70 @@
+//
+//  CatalogueInfo.m
+//  DatabaseExample
+//
+//  Created by MAC22 on 07/07/11.
+//  Copyright 2011 Diaspark India. All rights reserved.
+//
+
+#import "CatalogueInfo.h"
+
+
+@implementation Catalogue
+@synthesize ProductID;
+@synthesize ImageName;
+@synthesize Description;
+@synthesize BuyURL;
+
+-(void)dealloc{
+    
+    [ImageName release];
+    [Description release];
+    [BuyURL release];
+    [super dealloc];
+    
+}
+@end
+
+
+@implementation AlternateImage
+@synthesize ID;
+@synthesize ProductID;
+@synthesize ImageName;
+
+-(void)dealloc{
+    
+    [ImageName release];
+    [super dealloc];
+    
+}
+@end
+
+
+@implementation Testimonial
+@synthesize ID;
+@synthesize ProductID;
+@synthesize Testimonial;
+@synthesize Author;
+
+-(void)dealloc{
+    
+    [Testimonial release];
+    [Author release];
+    [super dealloc];
+    
+}
+@end
+
+
+@implementation Video
+@synthesize ID;
+@synthesize ProductID;
+@synthesize VideoName;
+
+-(void)dealloc{
+    
+    [VideoName release];
+    [super dealloc];
+}
+@end
+

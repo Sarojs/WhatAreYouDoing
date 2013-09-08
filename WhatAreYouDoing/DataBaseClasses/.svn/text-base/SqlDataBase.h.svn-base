@@ -1,0 +1,34 @@
+
+#import <sqlite3.h>
+#import "Person.h"
+
+/********************************************************************************************************************
+ * FoodFacts		: SqlDataBase
+ * Abstract		: This class will perform the All operations regarding to the Database. Queries were written in this Class.
+ * Author			: Namit Nayak @ Diaspark Inc.
+ * Date			: 16 January 2011
+ *********************************************************************************************************************/
+@interface SqlDataBase : NSObject 
+
+{
+@private
+	sqlite3				*m_pDataBase;
+	sqlite3_stmt		*m_pSqlStatement;	
+	sqlite3_stmt		*m_pSqlStatementTemp;
+}
+-(void) openDataBase;
+-(void) closeDataBase;
+
+-(NSArray*)getAllPeople;
+-(void)insertDummyData;
+-(void)deleteRow;
+-(void)updateRow;
+
+// Flower database
+-(NSArray*) getAllCatalogue;
+-(NSArray*) getAllAlternateImageForProductID:(NSInteger)productID;
+-(NSArray*) getAllTestimonialsForProductID:(NSInteger)productID;
+-(NSArray*) getAllVideosForProductID:(NSInteger)productID;
+
+@end
+

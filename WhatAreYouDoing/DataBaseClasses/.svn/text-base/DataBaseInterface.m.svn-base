@@ -1,0 +1,97 @@
+//
+//  DataBase.m
+//  TestFoodFacts
+//
+//  Created by mac12 on 19/01/11.
+//  Copyright 2011 Diaspark India. All rights reserved.
+//
+
+#import "DataBaseInterface.h"
+
+
+@implementation DataBaseInterface
+#pragma mark -
+#pragma mark GETDATA  METHOD
++(void)closeDataBase{
+	SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	[dataBase closeDataBase];
+	[dataBase release];
+}
+
++ (NSArray*)getAllPersons
+{
+	SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	NSArray *arrProducts =  [[dataBase getAllPeople] retain];
+	
+	[dataBase release];
+	
+	return [arrProducts autorelease];
+	
+}
++(void) insertDummyData{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	[dataBase insertDummyData];
+	
+	[dataBase release];
+}
+
++(void)deleteRow{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	[dataBase deleteRow];
+	
+	[dataBase release];    
+}
+
++(void)updateRow{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	[dataBase updateRow];
+	
+	[dataBase release];        
+}
+
+// Flower database
++(NSArray*) getAllCatalogue{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	NSArray *arrCatalogue =  [[dataBase getAllCatalogue] retain];
+	
+	[dataBase release];
+	
+	return [arrCatalogue autorelease];
+}
+
++(NSArray*) getAllAlternateImageForProductID:(NSInteger)productID{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	NSArray *arrAlternateImage =  [[dataBase getAllAlternateImageForProductID:productID] retain];
+	
+	[dataBase release];
+	
+	return [arrAlternateImage autorelease];
+}
+
++(NSArray*) getAllTestimonialsForProductID:(NSInteger)productID{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	NSArray *arrTestimonials =  [[dataBase getAllTestimonialsForProductID:productID] retain];
+	
+	[dataBase release];
+	
+	return [arrTestimonials autorelease];
+}
+
++(NSArray*) getAllVideosForProductID:(NSInteger)productID{
+    SqlDataBase *dataBase = [[SqlDataBase alloc]init];
+	
+	NSArray *arrVideos =  [[dataBase getAllVideosForProductID:productID] retain];
+	
+	[dataBase release];
+	
+	return [arrVideos autorelease];
+}
+
+@end

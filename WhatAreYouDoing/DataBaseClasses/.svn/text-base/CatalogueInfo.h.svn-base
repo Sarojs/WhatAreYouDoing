@@ -1,0 +1,49 @@
+//
+//  CatalogueInfo.h
+//  DatabaseExample
+//
+//  Created by MAC22 on 07/07/11.
+//  Copyright 2011 Diaspark India. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+
+@interface Catalogue : NSObject {
+    
+}
+
+@property (nonatomic) NSInteger ProductID;
+@property (nonatomic, retain) NSString * ImageName;
+@property (nonatomic, retain) NSString * Description;
+@property (nonatomic, retain) NSString * BuyURL;
+
+@end
+
+@interface AlternateImage : NSObject {
+    
+}
+@property (nonatomic) NSInteger ID;
+@property (nonatomic) NSInteger ProductID;
+@property (nonatomic, retain) NSString * ImageName;
+
+@end
+
+@interface Testimonial : NSObject {
+    
+}
+@property (nonatomic) NSInteger ID;
+@property (nonatomic) NSInteger ProductID;
+@property (nonatomic, retain) NSString * Testimonial;
+@property (nonatomic, retain) NSString * Author;
+
+@end
+
+@interface Video : NSObject {
+    
+}
+@property (nonatomic) NSInteger ID;
+@property (nonatomic) NSInteger ProductID;
+@property (nonatomic, retain) NSString * VideoName;
+
+@end

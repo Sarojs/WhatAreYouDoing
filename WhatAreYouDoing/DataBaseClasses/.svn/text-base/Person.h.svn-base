@@ -1,0 +1,18 @@
+//
+//  Person.h
+//  DatabaseExample
+//
+//  Created by MAC22 on 04/07/11.
+//  Copyright (c) 2011 Diaspark India. All rights reserved.
+//
+
+
+@interface Person : NSObject {
+
+}
+@property (nonatomic, retain) NSString * Name;
+@property (nonatomic, retain) NSString * Phone;
+@property (nonatomic, retain) NSString * Email;
+@property (nonatomic, retain) NSString * Desc;
+
+@end

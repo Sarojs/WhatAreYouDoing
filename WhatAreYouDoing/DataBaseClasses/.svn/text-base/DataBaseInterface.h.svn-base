@@ -1,0 +1,26 @@
+//
+//  DataBase.h
+//  TestFoodFacts
+//
+//  Created by mac12 on 19/01/11.
+//  Copyright 2011 Diaspark India. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "SqlDataBase.h"
+
+@interface DataBaseInterface : NSObject {
+
+}
++ (NSArray*)getAllPersons;
++(void) insertDummyData;
++(void)deleteRow;
++(void)updateRow;
+
+// Flower database
++(NSArray*) getAllCatalogue;
++(NSArray*) getAllAlternateImageForProductID:(NSInteger)productID;
++(NSArray*) getAllTestimonialsForProductID:(NSInteger)productID;
++(NSArray*) getAllVideosForProductID:(NSInteger)productID;
+
+@end

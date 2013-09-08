@@ -1,0 +1,443 @@
+
+#import "SqlDataBase.h"
+#import "Person.h"
+#import "CatalogueInfo.h"
+
+//#define FOODFACTS_DATABASE_FILE @"Person"
+#define FOODFACTS_DATABASE_FILE @"FlowersDataBase"
+
+// Table name is PersonTable
+
+@implementation SqlDataBase
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//@Method		: openDataBase
+//@Abstract		: This method is responsible for connection Open of Sqlite Database.
+//@Param val	: NIL
+//@Returntype	: void
+//@Author		: Namit Nayak @ Diaspark Inc.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) 
+        {
+		
+		
+        }
+	return self;
+}
+
+-(void)openDataBase
+{
+	NSString * dataBasePath = nil;
+	NSString* pDatafile = FOODFACTS_DATABASE_FILE;
+	NSFileManager *manager = [[NSFileManager alloc]init];
+	
+	[manager setDelegate:self];
+	
+	NSString* path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+	dataBasePath = path;
+	BOOL isDirectory = FALSE;
+	[manager fileExistsAtPath:dataBasePath isDirectory:&isDirectory];
+	
+	
+	if(isDirectory == TRUE)
+        {
+		if(pDatafile!=nil)
+			dataBasePath = [dataBasePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",pDatafile]];
+        }
+	else
+        {
+		BOOL isTrue = FALSE;
+		
+		isTrue = [manager createDirectoryAtPath:dataBasePath withIntermediateDirectories:NO attributes:NO error:nil];		
+		
+		
+		if(isTrue)
+            {
+			if(pDatafile!=nil)
+				dataBasePath = [dataBasePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",pDatafile]];
+            }
+        }
+	
+	if([manager fileExistsAtPath:dataBasePath])
+        {
+		sqlite3_open([dataBasePath UTF8String], &m_pDataBase);
+        }
+	else 
+        {
+		NSString * resourcePath = [[NSBundle mainBundle] pathForResource:pDatafile ofType:@"sqlite"];
+        NSLog(@"resourcePath:%@",resourcePath);
+		NSError* error= nil;
+		if([manager copyItemAtPath:resourcePath toPath:dataBasePath error:&error])
+			
+			sqlite3_open([dataBasePath UTF8String], &m_pDataBase);
+		else
+            {
+#ifdef LOG_ENABLED
+            NSLog(@"Database Creation failed");
+#endif
+            }
+        }
+	[manager release];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//@Method		: closeDataBase
+//@Abstract		: This method is responsible for connection Close of Sqlite Database.
+//@Param val	: NIL
+//@Returntype	: void
+//@Author		: Namit Nayak @ Diaspark Inc.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-(void)closeDataBase
+{
+	if(m_pDataBase)
+        {
+		sqlite3_close(m_pDataBase);
+		m_pDataBase = nil;
+        }
+}
+
+-(NSArray*)getAllPeople{
+    
+	if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }
+	
+	
+	NSMutableArray *arrayProducts = [[NSMutableArray alloc] init];
+	
+	NSString* sqlQuery = @"SELECT * from PersonTable";	
+	
+	if(sqlite3_prepare_v2(m_pDataBase, [sqlQuery UTF8String], -1, &m_pSqlStatement, NULL) == SQLITE_OK)
+        {
+		while (sqlite3_step(m_pSqlStatement) == SQLITE_ROW)
+            {			
+                Person *person =[[Person alloc] init];
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,0))
+                    person.Name  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,0)];
+                else
+                    person.Name  = @"";
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,1))
+                    person.Phone  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,1)];
+                else
+                    person.Phone  = @"";
+                
+                if(sqlite3_column_text(m_pSqlStatement,2))
+                    person.Email  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,2)];
+                else
+                    person.Email  = @"";
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,3))
+                    person.Desc  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,3)];
+                else
+                    person.Desc  = @"";
+                
+                [arrayProducts addObject:person];
+                
+                [person release];                
+                
+            }
+		
+        }
+	
+	
+	sqlite3_finalize(m_pSqlStatement);	
+	[self closeDataBase];
+	return [arrayProducts autorelease];
+}
+
+-(void)insertDummyData{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }   
+    
+        NSString *insertSQL = [NSString stringWithFormat: @"INSERT INTO PersonTable (Name, Phone, Email, Desc) VALUES (\"%@\", \"%@\", \"%@\", \"%@\")", @"Manish", @"0745899011", @"manish.nahar@diaspark.com",@"Team Lead"];
+        
+        const char *insert_stmt = [insertSQL UTF8String];
+        
+        sqlite3_prepare_v2(m_pDataBase, insert_stmt, -1, &m_pSqlStatement, NULL);
+        if (sqlite3_step(m_pSqlStatement) == SQLITE_DONE)
+            {
+                NSLog(@"Contact added");
+            
+            } else {
+                NSLog(@"Failed to add contact:%@",sqlite3_errmsg(m_pDataBase));
+            }
+        sqlite3_finalize(m_pSqlStatement);
+        sqlite3_close(m_pDataBase);
+
+    
+}
+
+
+-(void)deleteRow{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }   
+    // We can delete rows using where clause, and also
+    // We can delete rows using RowId of rows in table without supplying any where clause below.
+    
+    NSString *deleteSQL = [NSString stringWithFormat: @"delete from PersonTable where rowid=2"];
+    
+    const char *delete_stmt = [deleteSQL UTF8String];
+    
+    sqlite3_prepare_v2(m_pDataBase, delete_stmt, -1, &m_pSqlStatement, NULL);
+    if (sqlite3_step(m_pSqlStatement) == SQLITE_DONE)
+        {
+        NSLog(@"Contact deleted");
+        
+        } else {
+            NSLog(@"Failed to delete:%@",sqlite3_errmsg(m_pDataBase));
+        }
+    sqlite3_finalize(m_pSqlStatement);
+    sqlite3_close(m_pDataBase);
+    
+    
+}
+
+-(void)updateRow{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }   
+    // We can delete rows using where clause, and also
+    // We can delete rows using RowId of rows in table without supplying any where clause below.
+    
+    NSString *updateSQL = [NSString stringWithFormat: @"update PersonTable set Desc='Mast personality' where rowid=3"];
+    
+    const char *update_stmt = [updateSQL UTF8String];
+    
+    sqlite3_prepare_v2(m_pDataBase, update_stmt, -1, &m_pSqlStatement, NULL);
+    if (sqlite3_step(m_pSqlStatement) == SQLITE_DONE)
+        {
+        NSLog(@"Contact updated");
+        
+        } else {
+            NSLog(@"Failed to update:%@",sqlite3_errmsg(m_pDataBase));
+        }
+    sqlite3_finalize(m_pSqlStatement);
+    sqlite3_close(m_pDataBase);
+    
+    
+}
+
+// Flower database
+-(NSArray*) getAllCatalogue{
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }
+	
+	
+	NSMutableArray *arrayProducts = [[NSMutableArray alloc] init];
+	
+	NSString* sqlQuery = @"SELECT * from Catalogue";	
+	
+	if(sqlite3_prepare_v2(m_pDataBase, [sqlQuery UTF8String], -1, &m_pSqlStatement, NULL) == SQLITE_OK)
+        {
+		while (sqlite3_step(m_pSqlStatement) == SQLITE_ROW)
+            {			
+                Catalogue *catalogue=[[Catalogue alloc] init];
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,0))
+                    catalogue.ProductID  = sqlite3_column_int(m_pSqlStatement,0);
+                else
+                    catalogue.ProductID  = -1;
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,1))
+                    catalogue.ImageName  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,1)];
+                else
+                    catalogue.ImageName  = @"";
+                
+                if(sqlite3_column_text(m_pSqlStatement,2))
+                    catalogue.Description  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,2)];
+                else
+                    catalogue.Description  = @"";
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,3))
+                    catalogue.BuyURL  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,3)];
+                else
+                    catalogue.BuyURL  = @"";
+                
+                [arrayProducts addObject:catalogue];
+                
+                [catalogue release];                
+                
+            }
+		
+        }	
+	
+	sqlite3_finalize(m_pSqlStatement);	
+	[self closeDataBase];
+	return [arrayProducts autorelease];
+}
+
+
+-(NSArray*) getAllAlternateImageForProductID:(NSInteger)productID{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }
+	
+	
+	NSMutableArray *alternateImagesArray = [[NSMutableArray alloc] init];
+	
+	NSString* sqlQuery = [NSString stringWithFormat:@"SELECT * from AlternateImage where ProductID=%i",productID];	
+	
+	if(sqlite3_prepare_v2(m_pDataBase, [sqlQuery UTF8String], -1, &m_pSqlStatement, NULL) == SQLITE_OK)
+        {
+		while (sqlite3_step(m_pSqlStatement) == SQLITE_ROW)
+            {			
+                AlternateImage *alternateImage=[[AlternateImage alloc] init];
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,0))
+                    alternateImage.ID  = sqlite3_column_int(m_pSqlStatement,0);
+                else
+                    alternateImage.ID  = -1;
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,1))
+                    alternateImage.ProductID  = sqlite3_column_int(m_pSqlStatement,1);
+                else
+                    alternateImage.ProductID  = -1;
+                
+                if(sqlite3_column_text(m_pSqlStatement,2))
+                    alternateImage.ImageName  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,2)];
+                else
+                    alternateImage.ImageName  = @"";
+                
+                
+                [alternateImagesArray addObject:alternateImage];
+                
+                [alternateImage release];                
+                
+            }
+        }	
+	
+	sqlite3_finalize(m_pSqlStatement);	
+	[self closeDataBase];
+	return [alternateImagesArray autorelease];
+}
+
+-(NSArray*) getAllTestimonialsForProductID:(NSInteger)productID{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }
+	
+	
+	NSMutableArray *testimonialsArray = [[NSMutableArray alloc] init];
+	
+	NSString* sqlQuery = [NSString stringWithFormat:@"SELECT * from Testimonial where ProductID=%i",productID];	
+	
+	if(sqlite3_prepare_v2(m_pDataBase, [sqlQuery UTF8String], -1, &m_pSqlStatement, NULL) == SQLITE_OK)
+        {
+		while (sqlite3_step(m_pSqlStatement) == SQLITE_ROW)
+            {			
+                Testimonial *testimonial=[[Testimonial alloc] init];
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,0))
+                    testimonial.ID  = sqlite3_column_int(m_pSqlStatement,0);
+                else
+                    testimonial.ID  = -1;
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,1))
+                    testimonial.ProductID  = sqlite3_column_int(m_pSqlStatement,1);
+                else
+                    testimonial.ProductID  = -1;
+                
+                if(sqlite3_column_text(m_pSqlStatement,2))
+                    testimonial.Testimonial  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,2)];
+                else
+                    testimonial.Testimonial  = @"";
+                
+                if(sqlite3_column_text(m_pSqlStatement,3))
+                    testimonial.Author  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,3)];
+                else
+                    testimonial.Author  = @"";
+                
+                
+                [testimonialsArray addObject:testimonial];
+                
+                [testimonial release];                
+                
+            }
+        }	
+	
+	sqlite3_finalize(m_pSqlStatement);	
+	[self closeDataBase];
+	return [testimonialsArray autorelease];
+}
+
+-(NSArray*) getAllVideosForProductID:(NSInteger)productID{
+    
+    if(m_pDataBase == nil){
+		[self openDataBase];
+        
+    }
+	
+	
+	NSMutableArray *videosArray = [[NSMutableArray alloc] init];
+	
+	NSString* sqlQuery = [NSString stringWithFormat:@"SELECT * from Video where ProductID=%i",productID];	
+	
+	if(sqlite3_prepare_v2(m_pDataBase, [sqlQuery UTF8String], -1, &m_pSqlStatement, NULL) == SQLITE_OK)
+        {
+		while (sqlite3_step(m_pSqlStatement) == SQLITE_ROW)
+            {			
+                Video *video=[[Video alloc] init];
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,0))
+                    video.ID  = sqlite3_column_int(m_pSqlStatement,0);
+                else
+                    video.ID  = -1;
+                
+                
+                if(sqlite3_column_text(m_pSqlStatement,1))
+                    video.ProductID  = sqlite3_column_int(m_pSqlStatement,1);
+                else
+                    video.ProductID  = -1;
+                
+                if(sqlite3_column_text(m_pSqlStatement,2))
+                    video.VideoName  = [NSString stringWithUTF8String: (const char*)sqlite3_column_text(m_pSqlStatement,2)];
+                else
+                    video.VideoName  = @"";
+                
+                
+                [videosArray addObject:video];
+                
+                [video release];
+            }
+        }	
+	
+	sqlite3_finalize(m_pSqlStatement);	
+	[self closeDataBase];
+	return [videosArray autorelease];
+}
+
+@end
